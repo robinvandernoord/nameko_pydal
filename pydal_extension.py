@@ -14,7 +14,7 @@ DB_URIS = 'database_uris'
 
 
 class DalProvider(DependencyProvider):
-    def __init__(self, define_model):
+    def __init__(self, define_model, custom_db=None):
         """
         Create a new pydal depencency provider.
         Use the callback to define the database model on container start.
@@ -24,6 +24,7 @@ class DalProvider(DependencyProvider):
         """
         super(DalProvider, self).__init__()
         self.define_model = define_model
+        self.custom_db = custom_db
         # print('DalProvider::__init__')
 
 
@@ -35,7 +36,12 @@ class DalProvider(DependencyProvider):
         # thread_id = uuid.uuid4()
         # TL.id = thread_id
         # print('DalProvider::worker_setup', getattr(TL,'id','?'))
-        db_config = self.container.config[DB_URIS][self.container.service_name]
+        if self.custom_db:
+            dbname = self.custom_db
+        else:
+            dbname = self.container.service_name
+
+        db_config = self.container.config[DB_URIS][dbname]
         self.db_args = db_config['args']
         self.db_kwargs = db_config['kwargs']
         self.other_args = db_config.get('other_args',{})
